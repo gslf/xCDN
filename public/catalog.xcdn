@@ -1,5 +1,5 @@
 // public/catalog.xcdn
-$schema: "https://gslf.github.io/xcdn/schemas/v1/meta.xcdn",
+$schema: "https://gslf.github.io/xCDN/schemas/v1/meta.xcdn",
 $meta: "updated=2025-11-22"
 
 #catalog {

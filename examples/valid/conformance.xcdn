@@ -10,7 +10,7 @@
    - $schema: URL/ID of the schema for validation
    - $meta:   freeform metadata (e.g., environment, author)
 */
-$schema: "https://gslf.github.io/xcdn/schemas/v1/meta.xcdn",
+$schema: "https://gslf.github.io/xCDN/schemas/v1/meta.xcdn",
 $meta:   "env=ci; suite=full"
 
 /* === ROOT DOCUMENT (or first value in a stream) === */

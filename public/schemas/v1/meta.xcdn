@@ -5,7 +5,7 @@
 // This document validates itself.
 // ------------------------------------------------------------
 
-$schema: "https://gslf.github.io/xcdn/schemas/v1/meta.xcdn",
+$schema: "https://gslf.github.io/xCDN/schemas/v1/meta.xcdn",
 $meta: "title=XCS Meta-Schema; version=1.0; status=stable"
 
 #schema {

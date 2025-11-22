@@ -33,7 +33,7 @@ JSON changed the world, but the world has changed since JSON. xCDN is designed f
     XCDN: Clean, Typed, Powerful.
     ----------------------------  */
 
-$schema: "https://gslf.github.io/xcdn/schemas/v1/meta.xcdn",
+$schema: "https://gslf.github.io/xCDN/schemas/v1/meta.xcdn",
 
 server_config: {
   host: "localhost",
