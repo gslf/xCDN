@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XCDN Standard Registry</title>
+    <style>
+        body { background: #0d1117; color: #c9d1d9; font-family: 'Courier New', monospace; padding: 2rem; max-width: 800px; margin: 0 auto; }
+        h1 { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .card { border: 1px solid #30363d; padding: 1rem; margin-bottom: 1rem; border-radius: 6px; background: #161b22; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; border: 1px solid #30363d; color: #8b949e; }
+        pre { color: #7ee787; }
+    </style>
+</head>
+<body>
+    
+    <h1>&gt; XCDN_ Standard Registry</h1>
+    <p>This is the official distribution point for eXtensible Cognitive Data Notation schemas and specifications.</p>
+
+    <div class="card">
+        <h3>📜 Meta-Schema (XCS)</h3>
+        <p>The formal definition for validating XCDN schemas.</p>
+        <p><span class="tag">v1.0 Stable</span></p>
+        <a href="./schemas/v1/meta.xcdn">view source</a>
+    </div>
+
+    <div class="card">
+        <h3>📓 Specification</h3>
+        <p>The human-readable semantics and data model.</p>
+        <a href="https://github.com/gslf/xcdn/blob/main/docs/SPECIFICATION.md">read on GitHub</a>
+    </div>
+
+    <div class="card">
+        <h3>🧩 Schema Catalog</h3>
+        <p>Machine-readable list of public schemas for tooling integration.</p>
+        <a href="./catalog.xcdn">catalog.xcdn</a>
+    </div>
+
+    <footer>
+        <hr style="border-color: #30363d;">
+        <small>Maintained by <a href="https://github.com/gslf">@gslf</a></small>
+    </footer>
+</body>
+</html>

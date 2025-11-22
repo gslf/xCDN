@@ -1,0 +1,25 @@
+// public/catalog.xcdn
+$schema: "https://gslf.github.io/xcdn/schemas/v1/meta.xcdn",
+$meta: "updated=2025-11-22"
+
+#catalog {
+  name: "xCDN Official Registry",
+  base_url: "https://gslf.github.io/xcdn/",
+  
+  schemas: [
+    {
+      name: "meta",
+      version: "1.0",
+      url: "schemas/v1/meta.xcdn",
+      description: "The recursive definition of the schema language itself.",
+      tags: ["core", "validation"]
+    },
+    {
+      name: "user-profile",
+      version: "1.0",
+      url: "schemas/examples/user.xcdn",
+      description: "Example user profile schema for demonstration.",
+      tags: ["example"]
+    }
+  ]
+}

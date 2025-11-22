@@ -1,0 +1,101 @@
+(* ---------- Lexicon & Whitespace ---------- *)
+
+document        = WS? prolog? value { WS? value }* WS? EOF ;
+(* A document is an optional prolog followed by one or more
+   values. A stream is a sequence of 1+ values. *)
+
+WS              = { whitespace | comment } ;
+whitespace      = " " | "\t" | "\r" | "\n" ;
+
+comment         = line_comment | block_comment ;
+line_comment    = "//" { ? any char except newline ? } ( "\n" | EOF ) ;
+block_comment   = "/*" { ? any char incl. newline, non-greedy ? } "*/" ;
+
+(* ---------- Optional Prolog ---------- *)
+
+prolog          = { directive WS? ("," WS?)? } ;
+directive       = "$" directive_name WS? ":" WS? string ;
+directive_name  = ident ;                       (* e.g.: schema, meta, include (if enabled) *)
+
+(* ---------- Values ---------- *)
+
+value           = annotations? primary ;
+
+annotations     = { annotation WS? } ;
+annotation      = "@" ident WS? ( "(" WS? arglist? WS? ")" )? ;
+arglist         = value { WS? "," WS? value } WS? ( "," )? ;
+
+primary         = object
+                | array
+                | tagged
+                | scalar ;
+
+tagged          = "#" ident WS? primary ;
+
+object          = "{" WS? members? WS? "}" ;
+members         = member { WS? "," WS? member } WS? ( "," )? ;
+member          = key WS? ":" WS? value ;
+key             = string | ident ;
+
+array           = "[" WS? elements? WS? "]" ;
+elements        = value { WS? "," WS? value } WS? ( "," )? ;
+
+(* ---------- Scalars ---------- *)
+
+scalar          = "null"
+                | boolean
+                | number
+                | decimal
+                | string
+                | bytes
+                | datetime
+                | duration
+                | uuid ;
+
+boolean         = "true" | "false" ;
+
+(* Numbers: integers and floating-point; no underscores *)
+number          = int | float ;
+int             = sign? digits ;
+float           = sign? ( digits "." digits exponent?
+                        | "." digits exponent?
+                        | digits exponent ) ;
+sign            = "+" | "-" ;
+digits          = digit { digit } ;
+digit           = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+exponent        = ( "e" | "E" ) sign? digits ;
+
+(* Arbitrary-precision decimals: canonicalizable text payload *)
+decimal         = "d" quoted_text ;
+bytes           = "b" quoted_base64 ;
+datetime        = "t" quoted_rfc3339 ;
+duration        = "r" quoted_iso8601_duration ;
+uuid            = "u" quoted_uuid ;
+
+(* ---------- Strings ---------- *)
+
+string          = dq_string | ml_string ;
+dq_string       = "\"" { char_esc | char_plain } "\"" ;
+ml_string       = "\"\"\"" { ml_char } "\"\"\"" ;
+
+char_plain      = ? any Unicode scalar value except " and \ and control chars ? ;
+char_esc        = "\\" ( "\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t"
+                        | "u" hex hex hex hex ) ;
+ml_char         = ? any Unicode scalar value, supports ""\" to escape triple-quote ? ;
+
+(* ---------- Quoted payloads for prefixed types ---------- *)
+
+quoted_text     = dq_string ;                    (* content: [+-]? [0-9]+ ("." [0-9]+)? *)
+quoted_base64   = dq_string ;                    (* content: Base64 URL-safe or standard *)
+quoted_rfc3339  = dq_string ;                    (* content: YYYY-MM-DDThh:mm:ss[.frac]Z|±hh:mm *)
+quoted_iso8601_duration = dq_string ;            (* content: PnYnMnDTnHnMnS *)
+quoted_uuid     = dq_string ;                    (* content: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx *)
+
+(* ---------- Identifiers ---------- *)
+
+ident           = ident_start { ident_part } ;
+ident_start     = letter | "_" ;
+ident_part      = letter | digit | "_" | "-" ;
+letter          = ? any Unicode letter ? ;
+
+EOF             = ? end of input ? ;

@@ -1,0 +1,141 @@
+Network Working Group                       Gioele Stefano Luca Fierro
+Internet-Draft                                            xCDN Project
+Intended status: Informational                       November 22, 2025
+Expires: May 26, 2026
+
+
+      The eXtensible Cognitive Data Notation (> xCDN_) Data Format
+                        draft-xcdn-core-00
+
+Abstract
+
+   eXtensible Cognitive Data Notation (XCDN) is a text-based data
+   interchange format structured to be both human-readable and
+   machine-parsable.  It extends the cognitive model of JSON with
+   native support for arbitrary-precision decimals, binary data,
+   timestamps, and comments, while introducing streaming capabilities
+   via whitespace-separated value sequences.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Conventions Used in This Document . . . . . . . . . . . . . .   2
+   3.  XCDN Structure  . . . . . . . . . . . . . . . . . . . . . . .   3
+   4.  Values and Types  . . . . . . . . . . . . . . . . . . . . . .   3
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+
+1.  Introduction
+
+   JavaScript Object Notation (JSON) [RFC8259] has become the de facto
+   standard for data interchange.  However, modern applications require
+   data types that JSON does not natively support, such as dates,
+   binary data, and arbitrary-precision decimals.  This often leads to
+   non-standard string encoding conventions.
+
+   XCDN addresses these limitations by providing a syntax that remains
+   familiar to users of the C-family of languages while strictly
+   defining parsing rules for complex scalars and supporting continuous
+   streams of data.
+
+2.  Conventions Used in This Document
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY",
+   and "OPTIONAL" in this document are to be interpreted as described
+   in BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in
+   all capitals, as shown here.
+
+3.  XCDN Structure
+
+   An XCDN document consists of an optional prolog followed by a
+   sequence of one or more values.
+
+      document = WS? prolog? value { WS? value }* WS? EOF
+
+   This structure allows XCDN to function both as a configuration file
+   format (a single top-level object) and a log streaming format
+   (multiple top-level objects separated by newlines).
+
+4.  Values and Types
+
+   XCDN distinguishes between generic scalars, typed literals (prefixed
+   strings), and structural composites.
+
+   4.1.  Typed Literals
+
+   To avoid ambiguity, complex types utilize a single-character prefix
+   followed by a quoted string.
+
+   o  Decimals: d"123.45" - MUST be preserved with original precision.
+   o  Binary: b"SGVsbG8=" - Base64 encoded data.
+   o  DateTime: t"2025-10-05T12:00:00Z" - RFC 3339 timestamp.
+   o  UUID: u"550e8400-..." - Universally Unique Identifier.
+
+   4.2.  Comments
+
+   XCDN supports C-style line comments (//) and block comments (/* */).
+   Parsers MUST ignore comments and treat them as whitespace.
+
+5.  IANA Considerations
+
+   This document requests the registration of the media type
+   "application/xcdn".
+
+   Type name: application
+   Subtype name: xcdn
+   Required parameters: n/a
+   Optional parameters: n/a
+   Encoding considerations: binary
+   Security considerations: See Section 6.
+   Interoperability considerations:
+      XCDN is not strictly compatible with JSON but maps 1:1 to the
+      JSON Data Model with extended types.
+
+6.  Security Considerations
+
+   Parsers implementing XCDN MUST ensure that:
+
+   1.  Arbitrary-precision decimals do not consume excessive memory.
+       Limits on significant digits SHOULD be configurable.
+   2.  Recursive structures (objects/arrays) are limited in depth to
+       prevent stack overflow attacks.
+   3.  Base64 decoding of 'b' literals is validated to prevent
+       buffer overruns in native implementations.
+
+7.  References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC8259]  Bray, T., Ed., "The JavaScript Object Notation (JSON)
+              Data Interchange Format", RFC 8259, December 2017.
+
+Authors' Addresses
+
+   Gioele Stefano Luca Fierro
+   The xCDN Project
+
+   Email: hck@gslf.it
+   URI:   https://github.com/gslf/xcdn

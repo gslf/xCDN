@@ -1,0 +1,22 @@
+// All the following lines should trigger parser errors.
+
+// 1. Duplicate keys in object
+{ a: 1, a: 2 }
+
+// 2. Double comma in array
+[1, 2,, 3]
+
+// 3. Malformed decimal literal
+d"12.34.56"
+
+// 4. Invalid DateTime (Month 13)
+t"2025-13-01T00:00:00Z"
+
+// 5. Invalid UUID format
+u"not-a-uuid"
+
+// 6. Unclosed annotation
+@unknown( 
+
+// 7. Missing primary value
+key:

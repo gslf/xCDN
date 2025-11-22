@@ -1,0 +1,202 @@
+// ------------------------------------------------------------
+// TXData Conformance Test File (v0.1)
+// Covers: prolog, comments, annotations, tags, scalars, collections,
+//         multiline strings, trailing comma, typed payloads,
+//         unknown extension handling, canonicalization hints.
+// ------------------------------------------------------------
+
+/* === PROLOG ===
+   Optional directives at the start of the document.
+   - $schema: URL/ID of the schema for validation
+   - $meta:   freeform metadata (e.g., environment, author)
+*/
+$schema: "https://gslf.github.io/xcdn/schemas/v1/meta.xcdn",
+$meta:   "env=ci; suite=full"
+
+/* === ROOT DOCUMENT (or first value in a stream) === */
+suite: {
+  // Name and version of the test suite
+  name: "TXData Conformance Suite",
+  version: "1.0.0",
+
+  // --- SCALARS ------------------------------------------------
+  scalars: @section("scalars") {
+    nullValue: null,
+    boolTrue:  true,
+    boolFalse: false,
+
+    // Integers (positive/negative, zero)
+    intZero: 0,
+    intPos:  42,
+    intNeg: -9223372036854775808, // large limits, parser must handle sign and width
+
+    // Floating point (possible forms)
+    floatBasic:   3.14159,
+    floatExpPos:  1.2e6,
+    floatExpNeg:  -4.2E-3,
+    floatLeadDot: .5,      // allowed
+    floatTrailDot: 1.,     // allowed
+
+    // Arbitrary-precision decimal
+    price: d"1234567890.001200",
+
+    // Strings: basic and multiline
+    title: "Hello \"TXData\" \u263A",
+    description: """
+      Line 1
+      Line 2 with "quotes"
+      Line 3: UTF-8 characters ✓
+    """,
+
+    // Bytes (base64; standard or URL-safe)
+    rawSmall: b"SGVsbG8",                // "Hello"
+    rawPng:   @mime("image/png") b"iVBORw0KGgoAAAANSUhEUgAAAAUA", // snippet
+
+    // RFC3339 DateTime and ISO8601 Duration
+    createdAt: t"2025-10-05T12:34:56Z",
+    localTime: t"2025-10-05T14:34:56+02:00",
+    timeout:   r"PT2H30M15.5S",
+
+    // UUID
+    id: u"550e8400-e29b-41d4-a716-446655440000",
+  },
+
+  // --- TAGGED VALUES (application extensions) ----------------
+  tagged: @section("tagged") {
+    moneyEUR: #money { amount: d"12.34", currency: "EUR" },
+    colorName: #color "rebeccapurple",
+    // Nested tag
+    pricedItem: #item {
+      sku: "ABC-001",
+      price: #money { amount: d"99.9900", currency: "USD" },
+    },
+    // Unknown tag: a parser should preserve/ignore based on policy
+    experimental: #x-unknown { note: "keep for round-trip", level: 2 },
+  },
+
+  // --- ANNOTATIONS (non-semantic metadata) ------------------
+  annotations: @section("annotations") {
+    // Multiple annotations on the same value; order is preserved
+    annotatedDuration:
+      @units("milliseconds") @since("1.2") r"PT0.250S",
+
+    annotatedBytes:
+      @compressed("gzip") @mime("application/json") b"H4sIAAAAAAAA/8vJzE1VKC4pysxLVQIAI9xP5QgAAAA=",
+
+    annotatedTag:
+      @critical(true) #feature "fast-io",
+  },
+
+  // --- ARRAY --------------------------------------------------
+  arrays: @section("arrays") {
+    // Heterogeneous array with trailing comma
+    mixed: [
+      null,
+      true,
+      123,
+      4.5e2,
+      d"1.2300",
+      "str",
+      b"AAEC",
+      t"2025-01-01T00:00:00Z",
+      r"P3DT4H",
+      u"123e4567-e89b-12d3-a456-426614174000",
+      #tagged [1, 2, 3,],   // nested + trailing comma
+    ],
+
+    // Empty array
+    empty: [],
+  },
+
+  // --- OBJECT -------------------------------------------------
+  objects: @section("objects") {
+    // Identifier or string keys; no duplicates; trailing comma allowed
+    server: {
+      host: "0.0.0.0",
+      port: 8080,
+      tls:  { enabled: false, minVersion: "1.3", },
+      // Unquoted key (identifier)
+      metrics: { path: "/metrics", sampleRate: 0.1 },
+    },
+
+    // Complex object with mixed types
+    app: {
+      name: "MyService",
+      version: "1.2.3",
+      features: ["fast-io", "metrics", "tracing",],
+      limits: {
+        maxConnections: 5000,
+        budget: #money { amount: d"1250.00", currency: "EUR" },
+      },
+      banner: b"iVBORw0KGgo...",  /* bytes */
+    },
+  },
+
+  // --- COMMENTS ----------------------------------------------
+  commentsDemo: @section("comments") {
+    // line comment
+    note: "this section demonstrates comments",
+    /*
+      block comment
+      multiline
+    */
+    ok: true,
+  },
+
+  // --- CANONICALIZATION (intentionally non-canonical input) ---
+  canonicalization_check: @section("canonicalization") {
+    // Keys are not in lexicographical order: canonical form must sort them
+    zKey: "last",
+    aKey: "first",
+    mKey: "middle",
+    // Numbers in different forms that must be normalized
+    intVariantA: +00042,
+    intVariantB: 42,
+    floatVariantA: 1.2300e+003,
+    floatVariantB: 1230.0,
+    // Strings: should be NFC after canonicalization
+    nfcSample: "café",   // already NFC
+    nfdSample: "cafe\u0301", // same rendering, different form
+    // Decimal: the scale must be preserved as part of the value if policy requires
+    decA: d"12.3400",
+    decB: d"12.34",
+  },
+
+  // --- UNKNOWN EXTENSIONS (annotation/tag) ----------------
+  unknowns: @section("unknowns") {
+    // Unknown annotations: to be ignored or maintained
+    @x-meta("opaque") @x-flag(true) value: "keep me",
+    // Nested unknown tag
+    payload: #x-custom { inner: #x-other "data" },
+  },
+
+  // --- NON-VALIDATABLE SNIPPETS (as strings) -----------------
+  // We keep "invalid" examples as string literals to not break the file.
+  invalid_snippets: @section("invalid") [
+    "{ a: 1, a: 2 }",                    // duplicate keys
+    "[1, 2,, 3]",                        // double comma
+    "d\"12.34.56\"",                     // malformed decimal
+    "t\"2025-13-01T00:00:00Z\"",         // month 13
+    "u\"not-a-uuid\"",                   // invalid uuid
+    "#money 123",                        // tag type non-compliant (expected object/string)
+    "@unknown( "                         // unclosed annotation
+  ],
+}
+
+// --- STREAMING EXAMPLE ---
+// The following values are part of the *same document* / *stream*
+// as the object above, separated by whitespace (newline).
+
+@event("update")
+#log_entry {
+  timestamp: t"2025-10-05T12:35:01Z",
+  level: "INFO",
+  message: "Service started successfully."
+}
+
+@event("metric")
+#gauge {
+  name: "cpu.load_avg.1m",
+  value: 0.75,
+  tags: ["env:prod", "region:eu-west-1"]
+}

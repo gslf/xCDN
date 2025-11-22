@@ -1,0 +1,110 @@
+// ------------------------------------------------------------
+// XCDN Meta-Schema (XCS) Version 1.0
+// The formal definition for validating XCDN Schema documents.
+// 
+// This document validates itself.
+// ------------------------------------------------------------
+
+$schema: "https://gslf.github.io/xcdn/schemas/v1/meta.xcdn",
+$meta: "title=XCS Meta-Schema; version=1.0; status=stable"
+
+#schema {
+  title: "XCDN Core Meta-Schema",
+  description: "A structural definition for validating XCDN schema files.",
+  type: "object",
+  
+  // The root of a schema file must be a Tagged Value (#schema)
+  // or an Object containing definitions.
+  
+  definitions: {
+    // --- 1. Fundamental Types List ---
+    xcdnType: {
+      type: "string",
+      enum: [
+        "null", "boolean", "integer", "float", "decimal",
+        "string", "bytes", "datetime", "duration", "uuid",
+        "array", "object", "tagged"
+      ]
+    },
+
+    // --- 2. The Schema Object Structure ---
+    // This is recursive: a schema contains properties which are schemas.
+    schemaObject: {
+      type: "object",
+      properties: {
+        // Metadata
+        title:       { type: "string" },
+        description: { type: "string" },
+        $id:         { type: "string", format: "uri" },
+        default:     { type: ["string", "number", "boolean", "null", "object", "array"] },
+        examples:    { type: "array" },
+        
+        // Core Logic
+        type: { 
+          type: ["string", "array"], // Can be "string" or ["string", "null"]
+          items: { $ref: "#/definitions/xcdnType" },
+          enum:  { $ref: "#/definitions/xcdnType" } 
+        },
+        
+        enum: { type: "array", description: "Restricts value to a fixed set" },
+        const: { description: "Value must match exactly" },
+
+        // --- Numeric Validation (Integers, Floats, Decimals) ---
+        multipleOf:       { type: ["integer", "decimal"] },
+        maximum:          { type: ["number", "decimal"] },
+        exclusiveMaximum: { type: ["number", "decimal"] },
+        minimum:          { type: ["number", "decimal"] },
+        exclusiveMinimum: { type: ["number", "decimal"] },
+
+        // --- String Validation ---
+        maxLength: { type: "integer", minimum: 0 },
+        minLength: { type: "integer", minimum: 0 },
+        pattern:   { type: "string", format: "regex" }, // Regex string
+        format:    { type: "string", enum: ["email", "uri", "uuid", "ipv4", "ipv6"] },
+
+        // --- Array Validation ---
+        items:       { $ref: "#/definitions/schemaObject" }, // Recursive ref
+        maxItems:    { type: "integer", minimum: 0 },
+        minItems:    { type: "integer", minimum: 0 },
+        uniqueItems: { type: "boolean", default: false },
+        contains:    { $ref: "#/definitions/schemaObject" },
+
+        // --- Object Validation ---
+        maxProperties:        { type: "integer", minimum: 0 },
+        minProperties:        { type: "integer", minimum: 0 },
+        required:             { type: "array", items: { type: "string" } },
+        properties:           { 
+          type: "object", 
+          additionalProperties: { $ref: "#/definitions/schemaObject" } 
+        },
+        additionalProperties: { type: ["boolean", "object"] }, // bool or schema
+
+        // --- Tagged Value Validation (XCDN Specific) ---
+        tagName: { type: "string", description: "Required tag identifier (e.g. 'money')" },
+        tagSchema: { $ref: "#/definitions/schemaObject" },
+
+        // --- Logic Compositors ---
+        allOf: { type: "array", items: { $ref: "#/definitions/schemaObject" } },
+        anyOf: { type: "array", items: { $ref: "#/definitions/schemaObject" } },
+        oneOf: { type: "array", items: { $ref: "#/definitions/schemaObject" } },
+        not:   { $ref: "#/definitions/schemaObject" },
+        
+        // --- Conditional Logic ---
+        if:   { $ref: "#/definitions/schemaObject" },
+        then: { $ref: "#/definitions/schemaObject" },
+        else: { $ref: "#/definitions/schemaObject" }
+      }
+    }
+  },
+
+  // Root validation rules
+  properties: {
+    definitions: {
+      type: "object",
+      additionalProperties: { $ref: "#/definitions/schemaObject" }
+    }
+  },
+  
+  // The schema itself validates that properties match the schemaObject definition
+  additionalProperties: { $ref: "#/definitions/schemaObject" }
+}
