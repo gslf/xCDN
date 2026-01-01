@@ -27,6 +27,13 @@ JSON changed the world, but the world has changed since JSON. xCDN is designed f
 | ✨ **Annotations** | Non-intrusive metadata using `@meta`. Add hints without dirtying your data model. |
 | 🔧 **Human Friendly** | Unquoted keys, trailing commas, and multi-line strings (`"""`). |
 
+## 📚 Libraries
+
+Official xCDN parser implementations:
+
+- **Rust**: [xCDN-Rust](https://github.com/gslf/xCDN-Rust)
+- **Python**: [xCDN-Python](https://github.com/gslf/xCDN-Python)
+
 ## 🚀 Quick Taste
 ```xCDN
 /* ----------------------------- 
