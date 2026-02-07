@@ -33,6 +33,7 @@ Official xCDN parser implementations:
 
 - **Rust**: [xCDN-Rust](https://github.com/gslf/xCDN-Rust)
 - **Python**: [xCDN-Python](https://github.com/gslf/xCDN-Python)
+- **JavaScript**: [xCDN-JavaScript](https://github.com/gslf/xCDN-JavaScript)
 
 ## 🚀 Quick Taste
 ```xCDN
